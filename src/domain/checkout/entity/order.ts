@@ -25,6 +25,15 @@ export default class Order {
     return this._items;
   }
 
+  get price(): number {
+    return this._total;
+  }
+
+  changeItems(items: OrderItem[]): void {
+    this._items = items;
+    this.validate();
+  }
+
   validate(): boolean {
     if (this._id.length === 0) {
       throw new Error("Id is required");
@@ -39,7 +48,6 @@ export default class Order {
     if (this._items.some((item) => item.quantity <= 0)) {
       throw new Error("Quantity must be greater than 0");
     }
-
     return true;
   }
 
