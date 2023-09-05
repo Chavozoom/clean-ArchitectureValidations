@@ -1,5 +1,11 @@
+import EventDispatcher from "../../@shared/event/event-dispatcher";
+import CreatedCostumerEvent from "../event/created-costumer-event";
+import LogWhenConstumerCreated1 from "../event/handler/log-when-costumer-created.handler";
+import LogWhenConstumerCreated2 from "../event/handler/log-when-costumer-created2.handler";
 import Address from "../value-object/address";
 import Customer from "./customer";
+import AddressUpdatedEvent from "../event/address-updated-event";
+import AddressUpdated from "../event/handler/address-updated.handler";
 
 describe("Customer unit tests", () => {
   it("should throw error when id is empty", () => {
@@ -59,5 +65,56 @@ describe("Customer unit tests", () => {
 
     customer.addRewardPoints(10);
     expect(customer.rewardPoints).toBe(20);
+  });
+
+  it("should notify two logs when user created", () => {
+    const eventDispatcher = new EventDispatcher();
+    const eventHandler = new LogWhenConstumerCreated1();
+    const eventHandler2 = new LogWhenConstumerCreated2();
+    const spyEventHandler = jest.spyOn(eventHandler, "handle");
+    const spyEventHandler2 = jest.spyOn(eventHandler2, "handle");
+
+    eventDispatcher.register("CreatedCostumerEvent", eventHandler);
+    eventDispatcher.register("CreatedCostumerEvent", eventHandler2);
+
+    expect(
+      eventDispatcher.getEventHandlers["CreatedCostumerEvent"][0]
+    ).toMatchObject(eventHandler);
+
+    const customer = new Customer("1", "Customer 1");
+
+    const customerCreatedEvent = new CreatedCostumerEvent({
+      name: customer.name,
+      id: customer.id
+    });
+
+    eventDispatcher.notify(customerCreatedEvent);
+
+    expect(spyEventHandler).toHaveBeenCalled();
+    expect(spyEventHandler2).toHaveBeenCalled();
+  });
+
+  it("should notify when user address updated", () => {
+    const eventDispatcher = new EventDispatcher();
+    const eventHandler = new AddressUpdated();
+    const spyEventHandler = jest.spyOn(eventHandler, "handle");
+
+
+    // Create a customer instance
+    const customer = new Customer('1', 'Customer 1');
+
+    const newAddress = new Address('Street 1', 123, '13330-250', 'São Paulo');
+    customer.changeAddress(newAddress);
+
+    eventDispatcher.register("AddressUpdatedEvent", eventHandler);
+    const addressUpdatedEvent = new AddressUpdatedEvent({
+      id: customer.id,
+      name: customer.name,
+      address: newAddress
+    });
+
+    eventDispatcher.notify(addressUpdatedEvent);
+
+    expect(spyEventHandler).toHaveBeenCalled();
   });
 });
