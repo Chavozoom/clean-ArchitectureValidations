@@ -11,14 +11,21 @@ describe("Customer unit tests", () => {
   it("should throw error when id is empty", () => {
     expect(() => {
       let customer = new Customer("", "John");
-    }).toThrowError("Id is required");
+    }).toThrowError("customer: Id is required");
   });
 
   it("should throw error when name is empty", () => {
     expect(() => {
       let customer = new Customer("123", "");
-    }).toThrowError("Name is required");
+    }).toThrowError("customer: Name is required");
   });
+
+  it("should throw error when id and name is empty", () => {
+    expect(() => {
+      let customer = new Customer("", "");
+    }).toThrowError("customer: Id is required,customer: Name is required");
+  });
+
 
   it("should change name", () => {
     // Arrange
@@ -99,8 +106,6 @@ describe("Customer unit tests", () => {
     const eventHandler = new AddressUpdated();
     const spyEventHandler = jest.spyOn(eventHandler, "handle");
 
-
-    // Create a customer instance
     const customer = new Customer('1', 'Customer 1');
 
     const newAddress = new Address('Street 1', 123, '13330-250', 'São Paulo');
